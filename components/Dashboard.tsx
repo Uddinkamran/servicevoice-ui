@@ -44,30 +44,30 @@ interface DashboardProps {
 export function Dashboard({ data }: DashboardProps | any) {
   const router = useRouter();
 
-  const handleLogin = () => {
-    router.push("https://alexirx-plmvtyamya-uc.a.run.app"); // Replace with your desired path
-  };
-
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const checkLoginStatus = () => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.includes("auth-token")); // Adjust according to your cookie name pattern
+
+    if (token) {
+      setIsLoggedIn(true);
+      console.log("Logged in");
+    } else {
+      setIsLoggedIn(false);
+      console.log("Not logged in");
+    }
+  };
+
   useEffect(() => {
-    const checkLoginStatus = () => {
-      console.log(document.cookie);
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.includes("auth-token")); // Adjust according to your cookie name pattern
-
-      if (token) {
-        setIsLoggedIn(true);
-        console.log("Logged in");
-      } else {
-        setIsLoggedIn(false);
-        console.log("Not logged in");
-      }
-    };
-
-    checkLoginStatus();
+    checkLoginStatus(); // Check login status on component mount
   }, []);
+
+  const handleLogin = () => {
+    checkLoginStatus(); // Check login status on login button click
+    window.location.href = "https://alexirx-plmvtyamya-uc.a.run.app"; // Redirect to the Google login page
+  };
 
   const handleSave = async () => {
     setIsBusinessInfoEditable(false);
