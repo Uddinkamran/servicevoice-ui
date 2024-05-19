@@ -33,6 +33,7 @@ export default function Login({
     "use server";
 
     const origin = headers().get("origin");
+    console.log(origin)
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const supabase = createClient();
