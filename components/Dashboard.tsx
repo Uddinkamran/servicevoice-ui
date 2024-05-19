@@ -48,16 +48,17 @@ export function Dashboard({ data }: DashboardProps | any) {
     router.push("https://alexirx-plmvtyamya-uc.a.run.app"); // Replace with your desired path
   };
 
-  // Check cookie for login status
   useEffect(() => {
     const checkLoginStatus = () => {
-      console.log(document.cookie)
       const token = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("gcal_token="));
+        .find((row) => row.includes("auth-token")); // Adjust according to your cookie name pattern
+
       if (token) {
+        // setIsLoggedIn(true);
         console.log("Logged in");
       } else {
+        // setIsLoggedIn(false);
         console.log("Not logged in");
       }
     };
