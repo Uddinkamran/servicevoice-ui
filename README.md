@@ -4,7 +4,7 @@
 </a>
 
 <p align="center">
- The fastest way to build apps with Next.js and Supabase
+ Your AI Voice Assistant Control Panel
 </p>
 
 <p align="center">
