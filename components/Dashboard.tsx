@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; // Import React and useState
+import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 import Link from "next/link";
 import {
@@ -37,15 +38,20 @@ interface BusinessData {
 }
 
 interface DashboardProps {
-  data: BusinessData[] | undefined; // Assuming BusinessData is defined elsewhere
+  data: BusinessData[] | undefined;
 }
 
-export function Dashboard(data: any) {
-  // Event handler for saving data
+export function Dashboard({ data }: DashboardProps | any) {
+  const router = useRouter();
+
+  const handleLogin = () => {
+    router.push("https://alexirx-plmvtyamya-uc.a.run.app"); // Replace with your desired path
+  };
+
   const handleSave = async () => {
     setIsBusinessInfoEditable(false);
     setIsAgentEditable(false);
-    setIsPhoneEditable(false)
+    setIsPhoneEditable(false);
 
     const updates = {
       businessName: businessName,
@@ -62,7 +68,7 @@ export function Dashboard(data: any) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: data.data.id,
+          id: data.id,
           updates: updates,
         }),
       });
@@ -80,60 +86,44 @@ export function Dashboard(data: any) {
 
   const [isBusinessInfoEditable, setIsBusinessInfoEditable] = useState(false);
 
-  // State for input values
   const [businessName, setBusinessName] = useState(
-    data.data.businessName || "Business Name"
+    data?.businessName || "Business Name"
   );
   const [businessAddress, setBusinessAddress] = useState(
-    data.data.businessAddress || "1234 Default Address"
+    data?.businessAddress || "1234 Default Address"
   );
   const [businessHours, setBusinessHours] = useState(
-    data.data.businessHours || "9 AM - 5 PM every working day"
+    data?.businessHours || "9 AM - 5 PM every working day"
   );
 
   const [isAgentEditable, setIsAgentEditable] = useState(false);
-  const [agentName, setAgentName] = useState(data.data.agentName || "Ellie");
+  const [agentName, setAgentName] = useState(data?.agentName || "Ellie");
   const [agentVoice, setAgentVoice] = useState(
-    data.data.agentVoice || "ElevenLabs (Alice)"
+    data?.agentVoice || "ElevenLabs (Alice)"
   );
 
   const [isPhoneEditable, setIsPhoneEditable] = useState(false);
   const [businessPhone, setBusinessPhone] = useState(
-    data.data.businessPhone || "+1 413 1391 1333"
+    data?.businessPhone || "+1 413 1391 1333"
   );
 
-  // non-editable in UI:
   const [callsConnected, setCallsConnected] = useState(
-    data.data.callsConnected || 1000
+    data?.callsConnected || 1000
   );
 
   const [scheduledAppointments, setScheduledAppointments] = useState(
-    data.data.scheduledAppointments || 1000
+    data?.scheduledAppointments || 1000
   );
 
   const [canceledAppointments, setCanceledAppointments] = useState(
-    data.data.canceledAppointments || 1000
+    data?.canceledAppointments || 1000
   );
 
   const [rescheduledCalls, setRescheduledCalls] = useState(
-    data.data.rescheduledCalls || 1000
+    data?.rescheduledCalls || 1000
   );
 
-  const [ROI, setROI] = useState(data.data.ROI || 1000);
-
-  console.log(
-    businessName,
-    businessAddress,
-    businessHours,
-    businessPhone,
-    agentName,
-    agentVoice,
-    callsConnected,
-    scheduledAppointments,
-    canceledAppointments,
-    rescheduledCalls,
-    ROI
-  );
+  const [ROI, setROI] = useState(data?.ROI || 1000);
 
   return (
     <section key="1" className="w-full min-h-screen">
@@ -143,8 +133,7 @@ export function Dashboard(data: any) {
             <CardHeader>
               <CardTitle>Analytics</CardTitle>
               <CardDescription>
-                Using ServiceVoice, you were able to reach the following
-                numbers:
+                Using ServiceVoice, you were able to reach the following numbers:
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -367,7 +356,7 @@ export function Dashboard(data: any) {
               </CardHeader>
               <CardContent>
                 <form className="flex flex-col gap-4">
-                  <Button>Log in with Google</Button>
+                  <Button onClick={handleLogin}>Log in with Google</Button>
                 </form>
               </CardContent>
             </Card>
