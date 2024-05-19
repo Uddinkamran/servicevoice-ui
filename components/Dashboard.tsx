@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 import {
@@ -47,6 +47,22 @@ export function Dashboard({ data }: DashboardProps | any) {
   const handleLogin = () => {
     router.push("https://alexirx-plmvtyamya-uc.a.run.app"); // Replace with your desired path
   };
+
+  // Check cookie for login status
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("gcal_token="));
+      if (token) {
+        console.log("Logged in");
+      } else {
+        console.log("Not logged in");
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const handleSave = async () => {
     setIsBusinessInfoEditable(false);
@@ -133,7 +149,8 @@ export function Dashboard({ data }: DashboardProps | any) {
             <CardHeader>
               <CardTitle>Analytics</CardTitle>
               <CardDescription>
-                Using ServiceVoice, you were able to reach the following numbers:
+                Using ServiceVoice, you were able to reach the following
+                numbers:
               </CardDescription>
             </CardHeader>
             <CardContent>
