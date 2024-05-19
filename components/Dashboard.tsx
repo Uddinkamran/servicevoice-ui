@@ -377,11 +377,13 @@ export function Dashboard({ data }: DashboardProps | any) {
                 <CalendarIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                {isLoggedIn ? (
-                  <p>You are already logged in</p>
-                ) : (
-                  <Button onClick={handleLogin}>Log in with Google</Button>
-                )}
+                <form className="flex flex-col gap-4">
+                  {isLoggedIn ? (
+                    <p>You are already logged in</p>
+                  ) : (
+                    <Button onClick={handleLogin}>Log in with Google</Button>
+                  )}
+                </form>
               </CardContent>
             </Card>
           </div>
