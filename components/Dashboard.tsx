@@ -51,6 +51,7 @@ export function Dashboard({ data }: DashboardProps | any) {
   // Check cookie for login status
   useEffect(() => {
     const checkLoginStatus = () => {
+      console.log(document.cookie)
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("gcal_token="));
