@@ -48,6 +48,8 @@ export function Dashboard({ data }: DashboardProps | any) {
     router.push("https://alexirx-plmvtyamya-uc.a.run.app"); // Replace with your desired path
   };
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     const checkLoginStatus = () => {
       console.log(document.cookie);
@@ -375,9 +377,11 @@ export function Dashboard({ data }: DashboardProps | any) {
                 <CalendarIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <form className="flex flex-col gap-4">
+                {isLoggedIn ? (
+                  <p>You are already logged in</p>
+                ) : (
                   <Button onClick={handleLogin}>Log in with Google</Button>
-                </form>
+                )}
               </CardContent>
             </Card>
           </div>
