@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react"; // Import React and useState
-import axios from "axios"; // Ensure you have axios installed or use fetch
 
 import Link from "next/link";
 import {
