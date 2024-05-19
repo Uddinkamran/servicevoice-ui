@@ -58,10 +58,10 @@ export function Dashboard({ data }: DashboardProps | any) {
         .find((row) => row.includes("auth-token")); // Adjust according to your cookie name pattern
 
       if (token) {
-        // setIsLoggedIn(true);
+        setIsLoggedIn(true);
         console.log("Logged in");
       } else {
-        // setIsLoggedIn(false);
+        setIsLoggedIn(false);
         console.log("Not logged in");
       }
     };
