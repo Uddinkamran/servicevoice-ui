@@ -50,6 +50,7 @@ export function Dashboard({ data }: DashboardProps | any) {
 
   useEffect(() => {
     const checkLoginStatus = () => {
+      console.log(document.cookie);
       const token = document.cookie
         .split("; ")
         .find((row) => row.includes("auth-token")); // Adjust according to your cookie name pattern
