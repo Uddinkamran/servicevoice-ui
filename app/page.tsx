@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import { LandingPage } from "@/components/LandingPage";
 import ServiceVoiceLogoBlue from "@/components/ServiceVoiceLogoBlue";
 import ServiceVoiceLogoDark from "@/components/ServiceVoiceLogoDark";
+import Link from "next/link";
+import SignUpButton from "@/components/SignUpButton";
 
 export default async function Index() {
   const canInitSupabaseClient = () => {
@@ -27,7 +29,11 @@ export default async function Index() {
       <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
         <div className="w-full max-w-4xl flex justify-between items-center p-3 text-sm">
           <DeployButton />
-          {isSupabaseConnected && <AuthButton />}
+          {isSupabaseConnected && (
+          <div className="flex gap-4">
+            <SignUpButton />
+            <AuthButton />
+          </div> )}
         </div>
       </nav>
 

@@ -129,22 +129,22 @@ export function Dashboard({ data }: DashboardProps | any) {
   );
 
   const [callsConnected, setCallsConnected] = useState(
-    data?.callsConnected || 1000
+    data?.callsConnected
   );
 
   const [scheduledAppointments, setScheduledAppointments] = useState(
-    data?.scheduledAppointments || 1000
+    data?.scheduledAppointments 
   );
 
   const [canceledAppointments, setCanceledAppointments] = useState(
-    data?.canceledAppointments || 1000
+    data?.canceledAppointments 
   );
 
   const [rescheduledCalls, setRescheduledCalls] = useState(
-    data?.rescheduledCalls || 1000
+    data?.rescheduledCalls 
   );
 
-  const [ROI, setROI] = useState(data?.ROI || 1000);
+  const [ROI, setROI] = useState(data?.ROI );
 
   return (
     <section key="1" className="w-full min-h-screen">
@@ -170,7 +170,7 @@ export function Dashboard({ data }: DashboardProps | any) {
                   <CardContent>
                     <div className="text-2xl font-bold">{callsConnected}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +13.5% from last month
+                      {/* +13.5% from last month */}
                     </p>
                   </CardContent>
                 </Card>
@@ -186,7 +186,7 @@ export function Dashboard({ data }: DashboardProps | any) {
                       {scheduledAppointments}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +9.7% from last month
+                      {/* +9.7% from last month */}
                     </p>
                   </CardContent>
                 </Card>
@@ -202,7 +202,7 @@ export function Dashboard({ data }: DashboardProps | any) {
                       {canceledAppointments}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      -4.1% from last month
+                      {/* -4.1% from last month */}
                     </p>
                   </CardContent>
                 </Card>
@@ -216,7 +216,7 @@ export function Dashboard({ data }: DashboardProps | any) {
                   <CardContent>
                     <div className="text-2xl font-bold">{rescheduledCalls}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +6.2% from last month
+                      {/* +6.2% from last month */}
                     </p>
                   </CardContent>
                 </Card>
@@ -230,7 +230,7 @@ export function Dashboard({ data }: DashboardProps | any) {
                   <CardContent>
                     <div className="text-2xl font-bold">${ROI}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +20.5% from last month
+                      {/* +20.5% from last month */}
                     </p>
                   </CardContent>
                 </Card>

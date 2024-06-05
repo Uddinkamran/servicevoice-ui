@@ -1,12 +1,9 @@
 import DeployButton from "@/components/DeployButton";
 import AuthButton from "@/components/AuthButton";
 import { createClient } from "@/utils/supabase/server";
-import FetchDataSteps from "@/components/tutorial/FetchDataSteps";
-import Header from "@/components/Header";
 import { redirect } from "next/navigation";
 import { Dashboard } from "@/components/Dashboard";
 import { SupabaseClient } from "@supabase/supabase-js";
-
 
 interface BusinessData {
   id: number;
@@ -23,18 +20,37 @@ interface BusinessData {
   businessHours: string | null;
 }
 
-
 export default async function ProtectedPage() {
   const supabase = createClient();
 
-  const projectData = await fetchBusinessData(supabase)
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return redirect("/login");
+  }
+
+  const { data: userBusinessData, error: userBusinessError } = await supabase
+    .from("User")
+    .select("associatedBusiness, hasChosenBusiness")
+    .eq("id", user.id)
+    .single();
+
+  if (userBusinessError || !userBusinessData) {
+    console.error("Error fetching user's associated business:", userBusinessError);
+    return redirect("/error");
+  }
+
+  if (!userBusinessData.hasChosenBusiness) {
+    return redirect("/selectBusiness");
+  }
+
+  const businessId = userBusinessData.associatedBusiness;
+
+  const projectData = await fetchBusinessData(supabase, businessId);
+
+  if (projectData.error) {
+    console.error("Error fetching business data:", projectData.error);
+    return redirect("/error");
   }
 
   return (
@@ -48,21 +64,20 @@ export default async function ProtectedPage() {
         </nav>
       </div>
 
-      <Dashboard data = {projectData.businessData}></Dashboard>
-
+      <Dashboard data={projectData.businessData[0]}></Dashboard>
     </div>
   );
 }
 
-
-async function fetchBusinessData(supabaseClient: SupabaseClient<any, "public", any>) {
+async function fetchBusinessData(supabaseClient: SupabaseClient<any, "public", any>, businessId: number) {
   let { data: businessData, error } = await supabaseClient
-    .from("projectsettings") 
-    .select("*");
+    .from("Business")
+    .select("*")
+    .eq("id", businessId);
 
   if (error) {
     console.error("Error fetching business data:", error);
     return { error };
   }
-  return { businessData: businessData![1] };
+  return { businessData };
 }

@@ -8,11 +8,8 @@ export async function POST(req: Request) {
     const { id, updates } = body;
     const supabase = createClient();
 
-    console.log(id)
-    console.log(updates)
-
     const { data, error } = await supabase
-      .from("projectsettings")
+      .from("Business")
       .update(updates)
       .eq('id', id)
       .select();
