@@ -64,7 +64,7 @@ export default async function ProtectedPage() {
         </nav>
       </div>
 
-      <Dashboard data={projectData.businessData[0]}></Dashboard>
+      <Dashboard data={projectData.businessData![0]}></Dashboard>
     </div>
   );
 }
