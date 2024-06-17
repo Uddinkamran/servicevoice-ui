@@ -51,7 +51,6 @@ export default function SignUp({
       ]);
 
     if (userError) {
-      console.log(userError);
       return redirect("/signup?message=Could not complete profile setup");
     }
   

@@ -43,7 +43,6 @@ export default function BusinessSelectionComponent() {
     } = await supabase.auth.getUser();
 
     const userId = user?.id;
-    console.log(userId)
 
     if (selectedOption === "create") {
       if (!businessName || !newPassword) {
@@ -69,7 +68,6 @@ export default function BusinessSelectionComponent() {
         console.error(businessError);
       } else {
         const { id: businessId } = businessData;
-        console.log("Business ID: ", businessId);
 
         const { error: userError } = await supabase
           .from("User")
