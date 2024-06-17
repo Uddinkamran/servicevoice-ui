@@ -43,6 +43,7 @@ export default function BusinessSelectionComponent() {
     } = await supabase.auth.getUser();
 
     const userId = user?.id;
+    console.log(userId)
 
     if (selectedOption === "create") {
       if (!businessName || !newPassword) {
@@ -68,6 +69,7 @@ export default function BusinessSelectionComponent() {
         console.error(businessError);
       } else {
         const { id: businessId } = businessData;
+        console.log("Business ID: ", businessId);
 
         const { error: userError } = await supabase
           .from("User")
@@ -75,9 +77,11 @@ export default function BusinessSelectionComponent() {
           .eq("id", userId);
 
         if (userError) {
+          console.log("User error: ", userError);
           setError("Error associating business with user. Please try again.");
           console.error(userError);
         } else {
+          console.log("User updated successfully");
           router.push("/dashboard"); // Adjust this path as necessary
         }
       }

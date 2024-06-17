@@ -29,6 +29,9 @@ export default async function ProtectedPage() {
     return redirect("/login");
   }
 
+  console.log("User:", user);
+  console.log("User ID:", user.id);
+
   const { data: userBusinessData, error: userBusinessError } = await supabase
     .from("User")
     .select("associatedBusiness, hasChosenBusiness")
