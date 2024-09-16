@@ -1,6 +1,4 @@
-import Link from "next/link";
-import { headers } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { signIn } from "@/auth"
 import { redirect } from "next/navigation";
 import { SubmitButton } from "./submit-button";
 
@@ -9,70 +7,26 @@ export default function Login({
 }: {
   searchParams: { message: string };
 }) {
-  const signIn = async (formData: FormData) => {
+  const handleSignIn = async (formData: FormData) => {
     "use server";
 
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const result = await signIn("resend", {
       email,
-      password,
+      redirect: false,
+      callbackUrl: "/dashboard",
     });
 
-    if (error) {
-      return redirect("/login?message=Could not authenticate user");
+    if (result?.error) {
+      return redirect("/login?message=Could not send login link");
     }
 
-    // get user
-    const { data: user, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.log(userError);
-      return redirect("/login?message=Could not authenticate user");
-    }
-
-    // check whether user with this id hasChosenBusiness
-    const { data: userBusinessData, error: userBusinessError } = await supabase
-      .from("User")
-      .select("hasChosenBusiness")
-      .eq("id", user.user.id)
-      .single();
-
-
-    // if user has chosen a business, redirect to dashboard
-    if (userBusinessData?.hasChosenBusiness) {
-      return redirect("/dashboard");
-    }
-
-    // otherwise, redirect to choose business page
-    return redirect("/selectBusiness");
+    return redirect("/verify-request");
   };
 
   return (
     <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-      <Link
-        href="/"
-        className="absolute left-8 top-8 py-2 px-4 rounded-md no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1"
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>{" "}
-        Back
-      </Link>
-
       <form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
         <label className="text-md" htmlFor="email">
           Email
@@ -83,22 +37,12 @@ export default function Login({
           placeholder="you@example.com"
           required
         />
-        <label className="text-md" htmlFor="password">
-          Password
-        </label>
-        <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-6"
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          required
-        />
         <SubmitButton
-          formAction={signIn}
+          formAction={handleSignIn}
           className="bg-blue-500 rounded-md px-4 py-2 text-foreground mb-2 text-white"
-          pendingText="Signing In..."
+          pendingText="Sending Login Link..."
         >
-          Sign In
+          Send Login Link
         </SubmitButton>
         {searchParams?.message && (
           <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">

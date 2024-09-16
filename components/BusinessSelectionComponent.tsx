@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { useSession } from "next-auth/react";
 import {
   CardTitle,
   CardDescription,
@@ -19,101 +19,69 @@ import { Button } from "@/components/ui/button";
 export default function BusinessSelectionComponent() {
   const [selectedOption, setSelectedOption] = useState("join");
   const [businessName, setBusinessName] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
   const [businessPhone, setBusinessPhone] = useState("");
   const [businessHours, setBusinessHours] = useState("");
   const [agentName, setAgentName] = useState("");
   const [existingBusinessName, setExistingBusinessName] = useState("");
-  const [password, setPassword] = useState("");
+  const [existingPassword, setExistingPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const supabase = createClient();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    console.log("BusinessSelectionComponent mounted");
+    setSelectedOption("join");
+  }, []);
 
   const handleOptionChange = (value: string) => {
+    console.log("Option changed to:", value);
     setSelectedOption(value);
-    setError(""); // Clear error when option changes
+    setError("");
   };
 
   const handleSubmit = async () => {
-    setError(""); // Clear any previous error
+    console.log("Submitting business selection");
+    setError("");
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    if (status !== "authenticated" || !session?.user?.id) {
+      console.log("User not authenticated");
+      setError("User not authenticated");
+      return;
+    }
 
-    const userId = user?.id;
+    const endpoint = selectedOption === "create" ? "/api/business/create" : "/api/business/join";
+    const body = selectedOption === "create" 
+      ? { businessName, password, businessAddress, businessPhone, businessHours, agentName }
+      : { businessName: existingBusinessName, password: existingPassword };
 
-    if (selectedOption === "create") {
-      if (!businessName || !newPassword) {
-        setError("Please fill in the business name and password to create a new business.");
-        return;
+    console.log("Sending request to:", endpoint);
+    console.log("Request body:", JSON.stringify(body, null, 2));
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, userId: session.user.id }),
+      });
+
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(errorData.message || "An error occurred");
       }
 
-      const { data: businessData, error: businessError } = await supabase
-        .from("Business")
-        .insert([{
-          businessName: businessName,
-          password: newPassword,
-          businessAddress: businessAddress,
-          businessPhone: businessPhone,
-          businessHours: businessHours,
-          agentName: agentName,
-        }])
-        .select()
-        .single();
+      const responseData = await response.json();
+      console.log("Response data:", JSON.stringify(responseData, null, 2));
 
-      if (businessError) {
-        setError("Error creating business. Please try again.");
-        console.error(businessError);
-      } else {
-        const { id: businessId } = businessData;
-
-        const { error: userError } = await supabase
-          .from("User")
-          .update({ associatedBusiness: businessId, hasChosenBusiness: true })
-          .eq("id", userId);
-
-        if (userError) {
-          console.log("User error: ", userError);
-          setError("Error associating business with user. Please try again.");
-          console.error(userError);
-        } else {
-          console.log("User updated successfully");
-          router.push("/dashboard"); // Adjust this path as necessary
-        }
-      }
-    } else {
-      if (!existingBusinessName || !password) {
-        setError("Please fill in all fields to join an existing business.");
-        return;
-      }
-
-      const { data: businessData, error: businessError } = await supabase
-        .from("Business")
-        .select("*")
-        .eq("businessName", existingBusinessName)
-        .eq("password", password)
-        .single();
-
-      if (businessError || !businessData) {
-        setError("Invalid business name or password. Please try again.");
-        console.error(businessError);
-      } else {
-        const { id: businessId } = businessData;
-
-        const { error: userError } = await supabase
-          .from("User")
-          .update({ associatedBusiness: businessId, hasChosenBusiness: true })
-          .eq("id", userId);
-
-        if (userError) {
-          setError("Error associating business with user. Please try again.");
-          console.error(userError);
-        } else {
-          router.push("/dashboard"); 
-        }
-      }
+      console.log("Redirecting to dashboard");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      setError(error instanceof Error ? error.message : "An error occurred. Please try again.");
     }
   };
 
@@ -130,7 +98,7 @@ export default function BusinessSelectionComponent() {
       </CardHeader>
       <CardContent className="space-y-12">
         {error && <p className="text-red-500">{error}</p>}
-        <RadioGroup defaultValue="join" onValueChange={handleOptionChange}>
+        <RadioGroup value={selectedOption} onValueChange={handleOptionChange}>
           <div className="flex items-center gap-4">
             <RadioGroupItem id="join" value="join" />
             <Label className="text-sm font-medium" htmlFor="join">
@@ -151,15 +119,17 @@ export default function BusinessSelectionComponent() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label className="text-sm font-medium" htmlFor="password">
+                <Label className="text-sm font-medium" htmlFor="existing-password">
                   Password
                 </Label>
                 <Input
-                  id="password"
+                  id="existing-password"
                   type="password"
                   placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={existingPassword}
+                  onChange={(e) => {
+                    setExistingPassword(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -191,8 +161,8 @@ export default function BusinessSelectionComponent() {
                   id="new-password"
                   type="password"
                   placeholder="Enter password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">

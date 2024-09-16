@@ -1,142 +1,140 @@
-import Link from "next/link";
-import { headers } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { SubmitButton } from "../login/submit-button";
+'use client'
 
-export default function SignUp({
-  searchParams,
-}: {
-  searchParams: { message: string; errors?: { [key: string]: string } };
-}) {
-  const signUp = async (formData: FormData) => {
-    "use server";
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import Link from "next/link"
 
-    const origin = headers().get("origin");
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const fullName = formData.get("fullName") as string;
-    const phoneNumber = formData.get("phoneNumber") as string;
+export default function AuthPage() {
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [message, setMessage] = useState('')
+  const [isSignIn, setIsSignIn] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
-    const errors: { [key: string]: string } = {};
-    if (!email) errors.email = "Email is required";
-    if (!password) errors.password = "Password is required";
-    if (!fullName) errors.fullName = "Full Name is required";
-    if (!phoneNumber) errors.phoneNumber = "Phone Number is required";
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage('')
+    setIsSubmitted(false)
 
-    if (Object.keys(errors).length > 0) {
-      return { errors };
+    try {
+      const result = await signIn('resend', {
+        email,
+        name: isSignIn ? undefined : name,
+        redirect: false,
+        callbackUrl: '/dashboard',
+      });
+
+      if (result?.error) {
+        setMessage('Failed to send magic link. Please try again.')
+      } else {
+        setIsSubmitted(true)
+        setMessage('Magic link sent! Check your email.')
+      }
+    } catch (error) {
+      setMessage('An unexpected error occurred. Please try again.')
     }
+  }
 
-    const supabase = createClient();
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      return redirect("/signup?message=Could not sign up user");
-    }
-
-    const userId = data.user?.id;
-
-    const { error: userError } = await supabase
-      .from('User')
-      .insert([
-        { id: userId, full_name: fullName, phone_number: phoneNumber, email: email }
-      ]);
-
-    if (userError) {
-      return redirect("/signup?message=Could not complete profile setup");
-    }
-  
-    return redirect("/signup/confirmation");
-  };
-
-  const { errors } = searchParams || {};
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md text-center">
+          <h2 className="text-2xl font-bold">Check Your Email</h2>
+          <p>We've sent a magic link to your email address. Please check your inbox and click the link to {isSignIn ? "sign in" : "complete your registration"}.</p>
+          <p className="text-sm text-gray-500">Didn't receive an email? Check your spam folder or try again.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-      <Link
-        href="/"
-        className="absolute left-8 top-8 py-2 px-4 rounded-md no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1"
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500"
         >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>{" "}
-        Back
-      </Link>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 h-4 w-4"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back
+        </Link>
 
-      <form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
-        <label className="text-md" htmlFor="fullName">
-          Full Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          className={`rounded-md px-4 py-2 bg-inherit border mb-6 ${errors?.fullName ? 'border-red-500' : ''}`}
-          name="fullName"
-          placeholder="John Doe"
-          required
-        />
-        {errors?.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
-        <label className="text-md" htmlFor="phoneNumber">
-          Phone Number <span className="text-red-500">*</span>
-        </label>
-        <input
-          className={`rounded-md px-4 py-2 bg-inherit border mb-6 ${errors?.phoneNumber ? 'border-red-500' : ''}`}
-          name="phoneNumber"
-          placeholder="+123456789"
-          required
-        />
-        {errors?.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
-        <label className="text-md" htmlFor="email">
-          Email <span className="text-red-500">*</span>
-        </label>
-        <input
-          className={`rounded-md px-4 py-2 bg-inherit border mb-6 ${errors?.email ? 'border-red-500' : ''}`}
-          name="email"
-          placeholder="you@example.com"
-          required
-        />
-        {errors?.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-        <label className="text-md" htmlFor="password">
-          Password <span className="text-red-500">*</span>
-        </label>
-        <input
-          className={`rounded-md px-4 py-2 bg-inherit border mb-6 ${errors?.password ? 'border-red-500' : ''}`}
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          required
-        />
-        {errors?.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-        <SubmitButton
-          formAction={signUp}
-          className="bg-blue-500 border border-foreground/20 rounded-md px-4 py-2 text-foreground mb-2 text-white"
-          pendingText="Signing Up..."
-        >
-          Sign Up
-        </SubmitButton>
-        {searchParams?.message && (
-          <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
-            {searchParams.message}
-          </p>
+        <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900">
+          {isSignIn ? "Sign in to your account" : "Sign up for an account"}
+        </h2>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {!isSignIn && (
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {isSignIn ? "Sign In" : "Sign Up"}
+            </button>
+          </div>
+        </form>
+
+        <div className="text-center">
+          <button
+            onClick={() => setIsSignIn(!isSignIn)}
+            className="text-sm text-blue-600 hover:text-blue-500"
+          >
+            {isSignIn ? "Need an account? Sign up" : "Already have an account? Sign in"}
+          </button>
+        </div>
+
+        {message && (
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-700 text-center">{message}</p>
+          </div>
         )}
-      </form>
+      </div>
     </div>
-  );
+  )
 }

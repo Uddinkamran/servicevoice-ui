@@ -23,7 +23,7 @@ import {
 import { JSX, SVGProps } from "react";
 
 interface BusinessData {
-  id: number;
+  id: string;
   businessName: string;
   businessAddress: string;
   agentName: string;
@@ -38,7 +38,7 @@ interface BusinessData {
 }
 
 interface DashboardProps {
-  data: BusinessData[] | undefined;
+  data: BusinessData | undefined;
 }
 
 export function Dashboard({ data }: DashboardProps | any) {
@@ -83,7 +83,7 @@ export function Dashboard({ data }: DashboardProps | any) {
     };
 
     try {
-      const response = await fetch("api/updateBusinessData", {
+      const response = await fetch("/api/updateBusinessData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

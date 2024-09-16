@@ -1,15 +1,10 @@
-import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export default async function SignUpButton() {
-  const supabase = createClient();
+  const session = await auth();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
+  if (session) {
     return null; // If user is authenticated, do not show Sign Up button
   }
 
@@ -18,7 +13,7 @@ export default async function SignUpButton() {
       href="/signup"
       className="py-2 px-3 flex rounded-md no-underline text-white bg-gray-700 hover:bg-gray-500"
     >
-      Sign Up
+      Sign Up / Login
     </Link>
   );
 }

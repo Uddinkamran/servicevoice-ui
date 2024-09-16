@@ -1,84 +1,59 @@
-import DeployButton from "@/components/DeployButton";
-import AuthButton from "@/components/AuthButton";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { Dashboard } from "@/components/Dashboard";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { auth } from "@/auth";
+import { PrismaClient } from '@prisma/client';
+import DashboardClient from "@/components/DashboardClient"; // Client Component
+import { redirect } from 'next/navigation';
 
-interface BusinessData {
-  id: number;
-  businessName: string;
-  businessAddress: string;
-  agentName: string;
-  agentVoice: string;
-  businessPhone: string | null;
-  callsConnected: number | null;
-  scheduledAppointments: number | null;
-  canceledAppointments: number | null;
-  rescheduledCalls: number | null;
-  ROI: number | null;
-  businessHours: string | null;
-}
+const prisma = new PrismaClient();
 
-export default async function ProtectedPage() {
-  const supabase = createClient();
+export default async function DashboardPage() {
+  let redirectPath: string | null = null;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    console.log("Starting DashboardPage function");
 
-  if (!user) {
-    return redirect("/login");
+    // Handle authentication
+    const session = await auth();
+    if (!session) {
+      console.log("No session, redirecting to login");
+      redirectPath = "/login";
+      return;
+    }
+
+    // Fetch user data
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(session.user?.id || '', 10) },
+      select: { associatedBusiness: true, hasChosenBusiness: true }
+    });
+
+    if (!user) {
+      redirectPath = "/login";
+      return;
+    }
+
+    // Redirect if no business has been chosen
+    if (!user.hasChosenBusiness || !user.associatedBusiness) {
+      console.log("User hasn't chosen a business, redirecting to selectBusiness");
+      redirectPath = "/selectBusiness";
+      return;
+    }
+
+    // Fetch business data
+    const businessData = await prisma.business.findUnique({
+      where: { id: user.associatedBusiness },
+    });
+
+    // Pass fetched business data to the Client Component
+    return <DashboardClient businessData={businessData} />;
+
+  } catch (error) {
+    console.error("Error in DashboardPage:", error);
+    redirectPath = "/";
+    return;
+  } finally {
+    if (redirectPath) {
+      redirect(redirectPath);
+    }
+
+    await prisma.$disconnect();
   }
-
-
-  const { data: userBusinessData, error: userBusinessError } = await supabase
-    .from("User")
-    .select("associatedBusiness, hasChosenBusiness")
-    .eq("id", user.id)
-    .single();
-
-  if (userBusinessError || !userBusinessData) {
-    console.error("Error fetching user's associated business:", userBusinessError);
-    return redirect("/error");
-  }
-
-  if (!userBusinessData.hasChosenBusiness) {
-    return redirect("/selectBusiness");
-  }
-
-  const businessId = userBusinessData.associatedBusiness;
-
-  const projectData = await fetchBusinessData(supabase, businessId);
-
-  if (projectData.error) {
-    console.error("Error fetching business data:", projectData.error);
-    return redirect("/error");
-  }
-
-  return (
-    <div className="flex-1 w-full flex flex-col gap-0 items-center">
-      <div className="w-full">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-8xl flex justify-between items-center px-10 text-sm">
-            <DeployButton />
-            <AuthButton />
-          </div>
-        </nav>
-      </div>
-
-      <Dashboard data={projectData.businessData![0]}></Dashboard>
-    </div>
-  );
-}
-
-async function fetchBusinessData(supabaseClient: SupabaseClient<any, "public", any>, businessId: number) {
-  let { data: businessData, error } = await supabaseClient
-    .from("Business")
-    .select("*")
-    .eq("id", businessId);
-
-  if (error) {
-    console.error("Error fetching business data:", error);
-    return { error };
-  }
-  return { businessData };
 }

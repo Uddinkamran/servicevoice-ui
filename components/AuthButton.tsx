@@ -1,41 +1,23 @@
-import { createClient } from "@/utils/supabase/server";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function AuthButton() {
-  const supabase = createClient();
+import { signOut, useSession } from "next-auth/react";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function AuthButton() {
+  const { data: session } = useSession();
 
-  const signOut = async () => {
-    "use server";
-
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    return redirect("/");
-  };
-
-  if (user) {
+  if (session) {
     return (
       <div className="flex items-center gap-4">
-        Hey, {user.email}!
-        <form action={signOut}>
-          <button className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover">
-            Logout
-          </button>
-        </form>
+        Hey, {session.user?.email}!
+        <button
+          onClick={() => signOut({ callbackUrl: '/' })}
+          className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
+        >
+          Logout
+        </button>
       </div>
     );
   }
 
-  return (
-    <Link
-      href="/login"
-      className="py-2 px-3 flex rounded-md no-underline  text-white bg-blue-600 hover:bg-blue-500"
-    >
-      Login
-    </Link>
-  );
+  return null;
 }

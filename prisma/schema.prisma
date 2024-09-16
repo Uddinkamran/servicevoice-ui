@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  businessName          String
+  password              String?
+  businessAddress       String?
+  agentName             String?
+  agentVoice            String?
+  businessPhone         String?
+  businessHours         String?
+  callsConnected        Int?    @default(0) @db.SmallInt
+  scheduledAppointments Int?    @default(0) @db.SmallInt
+  rescheduledCalls      Int?    @default(0) @db.SmallInt
+  ROI                   Int?    @default(0) @db.SmallInt
+  canceledAppointments  Int?    @default(0) @db.SmallInt
+  id                    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User                  User[]
+}
+
+model reminders {
+  id                 BigInt  @id @default(autoincrement())
+  toNumber           String
+  reminder_sent_time String?
+  response_status    String?
+}
+
+model sms_conversation_history {
+  user_phone           String  @id
+  conversation_history String
+  updatedAt            String?
+  interactionCount     Int?    @db.SmallInt
+}
+
+model Account {
+  id                Int     @id(map: "accounts_pkey") @default(autoincrement())
+  userId            Int
+  type              String  @db.VarChar(255)
+  provider          String  @db.VarChar(255)
+  providerAccountId String  @db.VarChar(255)
+  refresh_token     String?
+  access_token      String?
+  expires_at        BigInt?
+  id_token          String?
+  scope             String?
+  session_state     String?
+  token_type        String?
+}
+
+model Session {
+  id           Int      @id(map: "sessions_pkey") @default(autoincrement())
+  userId       Int
+  expires      DateTime @db.Timestamptz(6)
+  sessionToken String   @db.VarChar(255)
+}
+
+model User {
+  id                 Int       @id(map: "users_pkey") @default(autoincrement())
+  name               String?   @db.VarChar(255)
+  email              String?   @unique(map: "unique_email") @db.VarChar(255)
+  emailVerified      DateTime? @db.Timestamptz(6)
+  image              String?
+  associatedBusiness String?
+  hasChosenBusiness  Boolean?  @default(false)
+  phone_number       String?   @db.VarChar(255)
+  business_name      String?   @db.VarChar(255)
+  business_id        String?   @db.Uuid
+  Business           Business? @relation(fields: [business_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_business")
+}
+
+model VerificationToken {
+  identifier String
+  expires    DateTime @db.Timestamptz(6)
+  token      String
+
+  @@id([identifier, token], map: "verification_token_pkey")
+}
