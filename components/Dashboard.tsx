@@ -21,6 +21,7 @@ import {
   Select,
 } from "@/components/ui/select";
 import { JSX, SVGProps } from "react";
+import Header from "./Header";
 
 interface BusinessData {
   id: string;
@@ -147,6 +148,8 @@ export function Dashboard({ data }: DashboardProps | any) {
   const [ROI, setROI] = useState(data?.ROI );
 
   return (
+    <div className="flex flex-col min-h-screen">
+    <Header />
     <section key="1" className="w-full min-h-screen">
       <main className="flex flex-col gap-2 p-4 md:gap-6 md:p-10">
         <div className="">
@@ -390,6 +393,7 @@ export function Dashboard({ data }: DashboardProps | any) {
         </section>
       </main>
     </section>
+    </div>
   );
 }
 

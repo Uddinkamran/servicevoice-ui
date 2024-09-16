@@ -1,21 +1,18 @@
-import NextLogo from "./NextLogo";
-import SupabaseLogo from "./SupabaseLogo";
-import ServiceVoiceLogoBlue from "./ServiceVoiceLogoBlue";
+import { signOut } from "next-auth/react";
+import DeployButton from "./DeployButton";
 
-export default function Header() {
+export default function DashboardHeader() {
   return (
-    <div className="flex flex-col gap-16 items-center">
-      <div className="flex gap-8 justify-center items-center">
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          rel="noreferrer"
+    <header className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+      <div className="w-full max-w-8xl flex justify-between items-center px-12 text-sm">
+        <DeployButton />
+        <button
+          onClick={() => signOut({ callbackUrl: '/' })}
+          className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
         >
-        </a>
-        <span className="border-l rotate-45 h-6" />
-          <ServiceVoiceLogoBlue />
+          Logout
+        </button>
       </div>
-      <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
-    </div>
+    </header>
   );
 }
