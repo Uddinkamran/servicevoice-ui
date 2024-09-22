@@ -15,14 +15,14 @@ export default async function SelectBusinessPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: parseInt(session.user?.id || '', 10) },
-    select: { associatedBusiness: true, hasChosenBusiness: true }
+    select: { associatedbusiness: true, haschosenbusiness: true }
   });
 
   if (!user) {
     return redirect("/login");
   }
 
-  if (user.hasChosenBusiness && user.associatedBusiness) {
+  if (user.haschosenbusiness && user.associatedbusiness) {
     return redirect("/dashboard");
   }
 

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     console.log("Finding business");
     const business = await prisma.business.findFirst({
-      where: { businessName }
+      where: { businessname: businessName }
     });
     console.log("Business found:", JSON.stringify(business, null, 2));
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     console.log("Updating user");
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId, 10) },
-      data: { hasChosenBusiness: true, associatedBusiness: business.id }
+      data: { haschosenbusiness: true, associatedbusiness: business.id }
     });
     console.log("User updated:", JSON.stringify(updatedUser, null, 2));
 

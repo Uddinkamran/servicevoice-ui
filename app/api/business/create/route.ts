@@ -16,11 +16,11 @@ export async function POST(request: Request) {
     console.log("Checking if user already has a business");
     const existingUser = await prisma.user.findUnique({
       where: { id: parseInt(userId, 10) },
-      include: { Business: true },
+      include: { business: true },
     });
     console.log("Existing user:", JSON.stringify(existingUser, null, 2));
 
-    if (existingUser?.Business) {
+    if (existingUser?.business) {
       console.log("User already has a business");
       return NextResponse.json({ error: 'User already has a business' }, { status: 400 });
     }
@@ -32,12 +32,12 @@ export async function POST(request: Request) {
     const business = await prisma.business.create({
       data: {
         id: businessId,
-        businessName,
+        businessname: businessName,
         password: hashedPassword,
-        businessAddress,
-        businessPhone,
-        businessHours,
-        agentName,
+        businessaddress: businessAddress,
+        businessphone: businessPhone,
+        businesshours: businessHours,
+        agentname: agentName,
         User: {
           connect: { id: parseInt(userId, 10) }
         }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     console.log("Updating user");
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId, 10) },
-      data: { hasChosenBusiness: true, associatedBusiness: businessId },
+      data: { haschosenbusiness: true, associatedbusiness: businessId },
     });
     console.log("User updated:", JSON.stringify(updatedUser, null, 2));
 

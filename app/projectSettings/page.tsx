@@ -14,15 +14,15 @@ export default async function ProjectSettings() {
   try {
     const user = await prisma.user.findUnique({
       where: { id: parseInt(session.user?.id || '', 10) },
-      select: { associatedBusiness: true }
+      select: { associatedbusiness: true }
     });
 
-    if (!user || !user.associatedBusiness) {
+    if (!user || !user.associatedbusiness) {
       return <div>No associated business found</div>;
     }
 
     const projectSettings = await prisma.business.findUnique({
-      where: { id: user.associatedBusiness },
+      where: { id: user.associatedbusiness },
     });
 
     

@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     // Fetch user data
     const user = await prisma.user.findUnique({
       where: { id: parseInt(session.user?.id || '', 10) },
-      select: { associatedBusiness: true, hasChosenBusiness: true }
+      select: { associatedbusiness: true, haschosenbusiness: true }
     });
 
     if (!user) {
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     }
 
     // Redirect if no business has been chosen
-    if (!user.hasChosenBusiness || !user.associatedBusiness) {
+    if (!user.haschosenbusiness || !user.associatedbusiness) {
       console.log("User hasn't chosen a business, redirecting to selectBusiness");
       redirectPath = "/selectBusiness";
       return;
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
 
     // Fetch business data
     const businessData = await prisma.business.findUnique({
-      where: { id: user.associatedBusiness },
+      where: { id: user.associatedbusiness },
     });
 
     // Pass fetched business data to the Client Component

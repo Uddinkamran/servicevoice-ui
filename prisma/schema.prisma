@@ -7,35 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Business {
-  businessName          String
-  password              String?
-  businessAddress       String?
-  agentName             String?
-  agentVoice            String?
-  businessPhone         String?
-  businessHours         String?
-  callsConnected        Int?    @default(0) @db.SmallInt
-  scheduledAppointments Int?    @default(0) @db.SmallInt
-  rescheduledCalls      Int?    @default(0) @db.SmallInt
-  ROI                   Int?    @default(0) @db.SmallInt
-  canceledAppointments  Int?    @default(0) @db.SmallInt
-  id                    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  User                  User[]
-}
-
 model reminders {
   id                 BigInt  @id @default(autoincrement())
-  toNumber           String
-  reminder_sent_time String?
-  response_status    String?
+  tonumber           String  @db.VarChar(255)
+  reminder_sent_time String? @db.VarChar(255)
+  response_status    String? @db.VarChar(255)
 }
 
 model sms_conversation_history {
-  user_phone           String  @id
+  user_phone           String  @id @db.VarChar(255)
   conversation_history String
-  updatedAt            String?
-  interactionCount     Int?    @db.SmallInt
+  updatedat            String? @db.VarChar(255)
+  interactioncount     Int?    @db.SmallInt
+}
+
+model business {
+  businessname          String  @db.VarChar(255)
+  password              String? @db.VarChar(255)
+  businessaddress       String? @db.VarChar(255)
+  agentname             String? @db.VarChar(255)
+  agentvoice            String? @db.VarChar(255)
+  businessphone         String? @db.VarChar(255)
+  businesshours         String? @db.VarChar(255)
+  callsconnected        Int?    @default(0) @db.SmallInt
+  scheduledappointments Int?    @default(0) @db.SmallInt
+  rescheduledcalls      Int?    @default(0) @db.SmallInt
+  roi                   Int?    @default(0) @db.SmallInt
+  canceledappointments  Int?    @default(0) @db.SmallInt
+  id                    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User                  User[]
 }
 
 model Account {
@@ -63,15 +63,15 @@ model Session {
 model User {
   id                 Int       @id(map: "users_pkey") @default(autoincrement())
   name               String?   @db.VarChar(255)
-  email              String?   @unique(map: "unique_email") @db.VarChar(255)
+  email              String?   @unique(map: "users_email_unique") @db.VarChar(255)
   emailVerified      DateTime? @db.Timestamptz(6)
   image              String?
-  associatedBusiness String?
-  hasChosenBusiness  Boolean?  @default(false)
+  associatedbusiness String?   @db.VarChar(255)
+  haschosenbusiness  Boolean?  @default(false)
   phone_number       String?   @db.VarChar(255)
   business_name      String?   @db.VarChar(255)
   business_id        String?   @db.Uuid
-  Business           Business? @relation(fields: [business_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_business")
+  business           business? @relation(fields: [business_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_business")
 }
 
 model VerificationToken {
